@@ -1,6 +1,5 @@
 {
-	"generator_info": "Shape definitions generated with PhysicsEditor. Visit https://www.codeandweb.com/physicseditor",
-	"stack-1": {
+	"stack1": {
 		"type": "fromPhysicsEditor",
 		"label": "stack-1",
 		"isStatic": false,
@@ -24,7 +23,7 @@
 			}
 		]
 	},
-	"stack-2": {
+	"stack2": {
 		"type": "fromPhysicsEditor",
 		"label": "stack-2",
 		"isStatic": false,
@@ -49,7 +48,7 @@
 			}
 		]
 	},
-	"stack-3": {
+	"stack3": {
 		"type": "fromPhysicsEditor",
 		"label": "stack-3",
 		"isStatic": false,
@@ -77,7 +76,7 @@
 			}
 		]
 	},
-	"stack-4": {
+	"stack4": {
 		"type": "fromPhysicsEditor",
 		"label": "stack-4",
 		"isStatic": false,
@@ -102,7 +101,7 @@
 			}
 		]
 	},
-	"stack-5": {
+	"stack5": {
 		"type": "fromPhysicsEditor",
 		"label": "stack-5",
 		"isStatic": false,
