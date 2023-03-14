@@ -47,6 +47,18 @@ export default class GameScene extends Phaser.Scene{
         this.input.on('pointerdown', spawner.AddSpawnableObject, spawner);
         this.scoreText.text = '0';
         //this.physics.add.collider(spawner.spawnedShapes, bounds.walls, this.CreateUI, this);
+
+        this.matter.world.on('collisionstart', (event, colliderA : Phaser.GameObjects.GameObject, colliderB : Phaser.GameObjects.GameObject)=>{
+            console.log('collision');
+            console.log(colliderA.name);
+            console.log(colliderB.name);
+            if(colliderA.name == 'stack' && colliderB.name == 'worldBounds'){
+                colliderA.destroy(true);
+            }
+            if(colliderA.name == 'worldBounds' && colliderB.name == 'stack'){
+                colliderB.destroy(true);
+            }
+        });
     }
 
     update(time: number, delta: number): void {
@@ -67,24 +79,24 @@ export default class GameScene extends Phaser.Scene{
         
         //Up
         let upperbounds = this.matter.add.gameObject(this.add.rectangle(w/2, 10, w, 10, 0x000000),{
-            label: 'worldBounds', 
+            name: 'worldBounds', 
             ignoreGravity: true, 
-            isStatic:true}, true);
+            isStatic:true}, true).setName('worldBounds');
         //Bot
         let lowerbounds = this.matter.add.gameObject(this.add.rectangle(w/2, h-20, w, 10, 0x000000),{
-            label: 'worldBounds', 
+            name: 'worldBounds', 
             ignoreGravity: true, 
-            isStatic:true}, true);
+            isStatic:true}, true).setName('worldBounds');
         //Left
         let leftbounds = this.matter.add.gameObject(this.add.rectangle(10, h/2, 10, h, 0x000000),{
-            label: 'worldBounds', 
+            name: 'worldBounds', 
             ignoreGravity: true, 
-            isStatic:true}, true);
+            isStatic:true}, true).setName('worldBounds');
         //Right
         let rightbounds = this.matter.add.gameObject(this.add.rectangle(w-10, h/2, 10, h, 0x000000),{
-            label: 'worldBounds', 
+            name: 'worldBounds', 
             ignoreGravity: true, 
-            isStatic:true}, true);
+            isStatic:true}, true).setName('worldBounds');
         //this.worldbounds = this.physics.add.staticGroup([upperbounds, ]);
     }
 }

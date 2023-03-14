@@ -31,7 +31,8 @@ export default class ObjectSpawner extends Phaser.GameObjects.Sprite{
     AddSpawnableObject(){
         
         var sprite = this.scene.add.sprite(this.x,this.y, this.texture, this.frame.name);
-        var obj = this.scene.matter.add.gameObject(sprite,{shape: this.currentShape},true);
+        var obj : Phaser.GameObjects.GameObject = this.scene.matter.add.gameObject(sprite,{name: 'stack', label: 'stack', shape: this.currentShape},true).setName('stack');
+        console.log(obj.name);
         this.spawnedShapes.push(obj);
         this.GetNextShape();
     }
