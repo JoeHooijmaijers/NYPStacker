@@ -6,12 +6,15 @@ export default class ObjectSpawner extends Phaser.GameObjects.Sprite{
     spawnrange : [-50, 50];
     shapes;
     currentShape;
+    spawnedShapes;
     
     constructor(scene: Phaser.Scene ,x: number, y:number, texture: string, frame: string){
         super(scene, x, y, texture, frame);
         this.DoTween();
         console.log(this.frame);
-        
+        this.shapes = this.scene.cache.json.get('shapes');
+        this.spawnedShapes = [];
+        this.GetNextShape();
     }
 
     DoTween(){
@@ -26,16 +29,18 @@ export default class ObjectSpawner extends Phaser.GameObjects.Sprite{
     }
 
     AddSpawnableObject(){
-        this.shapes = this.scene.cache.json.get('shapes');
-
+        
         var sprite = this.scene.add.sprite(this.x,this.y, this.texture, this.frame.name);
         var obj = this.scene.matter.add.gameObject(sprite,{shape: this.currentShape},true);
+        this.spawnedShapes.push(obj);
         this.GetNextShape();
     }
 
     GetNextShape(){
-        let rnd :string = 'stack-' + Phaser.Math.Between(1, 5);
-        this.setTexture('sprites', rnd);
+        let rnd :number = Phaser.Math.Between(1, 5);
+        let rndstring : string = 'stack-' + rnd;
+        this.setTexture('sprites', rndstring);
+        this.GetShapesByIndex(rnd);
     }
 
     GetShapesByIndex(index : number){
