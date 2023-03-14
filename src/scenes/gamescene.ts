@@ -1,11 +1,16 @@
-import { World } from 'matter';
+import { spawn } from 'child_process';
 import Phaser from 'phaser';
+import DroppableObject from '../classes/droppableObject';
 import ObjectSpawner from '../classes/objectSpawner';
 
+
 export default class GameScene extends Phaser.Scene{
+    
+    objectgroup;
     constructor(){
-        super('GameScene');
+        super('GameScene'); 
     }
+    
 
     preload(){
         //Stacksprites
@@ -19,28 +24,26 @@ export default class GameScene extends Phaser.Scene{
     }
 
     create(){
-        const { width, height} = this.cameras.main;
         var shapes = this.cache.json.get('shapes');
         var groundShape = this.cache.json.get('groundshape');
-        console.log(shapes);
-
-        let spawner = new ObjectSpawner(this, width -20, 100, 'sprites', 'stack-1');
-
         this.add.image(187, 406, 'background');
+        const { width, height} = this.cameras.main;
+        let ground = this.matter.add.gameObject(this.add.sprite(width/2, height-40, 'ground'), {shape: groundShape.ground, ignoreGravity: true, isStatic: true}, true);
+        const bounds = this.matter.world.setBounds(-100,0,width+200, height+100);
 
-        let deez = this.add.sprite(100, 100, 'sprites', 'stack-1');
-        let nuts = this.matter.add.gameObject(deez, {shape: shapes.stack1},true);
-
-        let ground = this.matter.add.gameObject(this.add.sprite(width/2, height-40, 'ground'), {shape: groundShape.ground}, true);
-
-        console.log(nuts)
-        
-        //this.matter.add.image(width/2, height-40, 'ground');
-        const bounds = this.matter.world.setBounds(0,0,width, height);
+        //Create objectSpawner
+        let spawner = new ObjectSpawner(this, width -20, 100, 'sprites', 'stack-1');
         this.add.existing(spawner);
+        this.input.on('pointerdown', spawner.AddSpawnableObject, spawner);
+        
     }
 
     update(time: number, delta: number): void {
         
     }
+
+    // Test(){
+    //     let deez = this.add.sprite(100, 100, 'sprites', 'stack-1');
+    //     let nuts = this.matter.add.gameObject(deez, {shape: shapes.stack1},true);
+    // }
 }
