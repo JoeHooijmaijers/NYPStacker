@@ -29,13 +29,12 @@ export default class GameScene extends Phaser.Scene{
         this.add.image(187, 406, 'background');
         const { width, height} = this.cameras.main;
         let ground = this.matter.add.gameObject(this.add.sprite(width/2, height-40, 'ground'), {shape: groundShape.ground, ignoreGravity: true, isStatic: true}, true);
-        const bounds = this.matter.world.setBounds(-100,0,width+200, height+100);
 
         //Create objectSpawner
         let spawner = new ObjectSpawner(this, width -20, 100, 'sprites', 'stack-1');
         this.add.existing(spawner);
         this.input.on('pointerdown', spawner.AddSpawnableObject, spawner);
-        
+
     }
 
     update(time: number, delta: number): void {
