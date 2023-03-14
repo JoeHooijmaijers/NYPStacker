@@ -9,6 +9,7 @@ export default class GameScene extends Phaser.Scene{
     objectgroup;
     score : number;
     scoreText: Phaser.GameObjects.Text;
+    worldbounds : Phaser.Physics.Arcade.StaticGroup;
     constructor(){
         super('GameScene'); 
     }
@@ -35,8 +36,9 @@ export default class GameScene extends Phaser.Scene{
         this.add.image(187, 406, 'background');
         const { width, height} = this.cameras.main;
         let ground = this.matter.add.gameObject(this.add.sprite(width/2, height-40, 'ground'), {shape: groundShape.ground, ignoreGravity: true, isStatic: true}, true);
-
+        
         this.CreateUI();
+        this.CreateGameObjectBounds(width, height);
 
         //Create objectSpawner
         const bounds = this.matter.world.setBounds(-100,0,width+200, height+100);
@@ -44,15 +46,11 @@ export default class GameScene extends Phaser.Scene{
         this.add.existing(spawner);
         this.input.on('pointerdown', spawner.AddSpawnableObject, spawner);
         this.scoreText.text = '0';
+        //this.physics.add.collider(spawner.spawnedShapes, bounds.walls, this.CreateUI, this);
     }
 
     update(time: number, delta: number): void {
         
-    }
-
-    DestroyObject(object){
-        const objectToDestroy :Phaser.GameObjects.GameObject = object;
-        objectToDestroy.destroy(true);
     }
 
     CreateUI(){
@@ -62,6 +60,31 @@ export default class GameScene extends Phaser.Scene{
         .setColor('0x000000')
         .setStyle({
             fontSize: '12pt'
-        })
+        });
+    }
+
+    CreateGameObjectBounds(w:number, h:number){
+        
+        //Up
+        let upperbounds = this.matter.add.gameObject(this.add.rectangle(w/2, 10, w, 10, 0x000000),{
+            label: 'worldBounds', 
+            ignoreGravity: true, 
+            isStatic:true}, true);
+        //Bot
+        let lowerbounds = this.matter.add.gameObject(this.add.rectangle(w/2, h-20, w, 10, 0x000000),{
+            label: 'worldBounds', 
+            ignoreGravity: true, 
+            isStatic:true}, true);
+        //Left
+        let leftbounds = this.matter.add.gameObject(this.add.rectangle(10, h/2, 10, h, 0x000000),{
+            label: 'worldBounds', 
+            ignoreGravity: true, 
+            isStatic:true}, true);
+        //Right
+        let rightbounds = this.matter.add.gameObject(this.add.rectangle(w-10, h/2, 10, h, 0x000000),{
+            label: 'worldBounds', 
+            ignoreGravity: true, 
+            isStatic:true}, true);
+        //this.worldbounds = this.physics.add.staticGroup([upperbounds, ]);
     }
 }
