@@ -1,9 +1,8 @@
-import { spawn } from 'child_process';
 import { debug } from 'console';
 import Phaser from 'phaser';
 import DroppableObject from '../classes/droppableObject';
 import ObjectSpawner from '../classes/objectSpawner';
-
+import ScoreRect from '../classes/ScoreRect';
 
 export default class GameScene extends Phaser.Scene{
     
@@ -11,6 +10,7 @@ export default class GameScene extends Phaser.Scene{
     score : number = 0;
     scoreText: Phaser.GameObjects.Text;
     worldbounds : Phaser.Physics.Arcade.StaticGroup;
+
     constructor(){
         super('GameScene'); 
     }
@@ -42,11 +42,32 @@ export default class GameScene extends Phaser.Scene{
         // this.CreateGameObjectBounds(width, height);
 
         //Create objectSpawner
-        const bounds = this.matter.world.setBounds(-100,0,width+200, height+100);
+        //const bounds = this.matter.world.setBounds(-100,0,width+200, height+100);
         let spawner = new ObjectSpawner(this, width -20, 200, 'sprites', 'stack-1');
         this.add.existing(spawner);
         this.input.on('pointerdown', spawner.AddSpawnableObject, spawner);
         this.scoreText.text = this.score.toString();
+
+        let scoreRect = new ScoreRect(this, width/2, height/2 + 75, width*0.8, height*0.6);
+        this.matter.add.gameObject(scoreRect, {
+            name:'scoreRect',
+            label:'scoreRect',
+            isStatic: true,
+            isSensor: true});
+
+        this.matter.world.on('collisionstart', (e, o1, o2)=>{
+            if([o1.label, o2.label].indexOf('scoreRect') !=-1){
+                this.score += scoreRect.scoreIncrement;
+                this.scoreText.text = this.score.toString();
+            }
+        })
+
+        this.matter.world.on('collisionend', (e, o1, o2)=>{
+            if([o1.label, o2.label].indexOf('scoreRect') !=-1){
+                this.score -= scoreRect.scoreIncrement;
+                this.scoreText.text = this.score.toString();
+            }
+        })
 
         //this.physics.add.collider(spawner.spawnedShapes, bounds.walls, this.CreateUI, this);
 
