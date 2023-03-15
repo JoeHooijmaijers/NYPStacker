@@ -11,7 +11,6 @@ export default class ObjectSpawner extends Phaser.GameObjects.Sprite{
     constructor(scene: Phaser.Scene ,x: number, y:number, texture: string, frame: string){
         super(scene, x, y, texture, frame);
         this.DoTween();
-        console.log(this.frame);
         this.shapes = this.scene.cache.json.get('shapes');
         this.spawnedShapes = [];
         this.GetNextShape();
@@ -32,7 +31,6 @@ export default class ObjectSpawner extends Phaser.GameObjects.Sprite{
         
         var sprite = this.scene.add.sprite(this.x,this.y, this.texture, this.frame.name);
         var obj : Phaser.GameObjects.GameObject = this.scene.matter.add.gameObject(sprite,{name: 'stack', label: 'stack', shape: this.currentShape},true).setName('stack');
-        console.log(obj.name);
         this.spawnedShapes.push(obj);
         this.GetNextShape();
     }

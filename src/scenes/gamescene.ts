@@ -1,4 +1,5 @@
 import { spawn } from 'child_process';
+import { debug } from 'console';
 import Phaser from 'phaser';
 import DroppableObject from '../classes/droppableObject';
 import ObjectSpawner from '../classes/objectSpawner';
@@ -7,7 +8,7 @@ import ObjectSpawner from '../classes/objectSpawner';
 export default class GameScene extends Phaser.Scene{
     
     objectgroup;
-    score : number;
+    score : number = 0;
     scoreText: Phaser.GameObjects.Text;
     worldbounds : Phaser.Physics.Arcade.StaticGroup;
     constructor(){
@@ -35,30 +36,41 @@ export default class GameScene extends Phaser.Scene{
         var groundShape = this.cache.json.get('groundshape');
         this.add.image(187, 406, 'background');
         const { width, height} = this.cameras.main;
-        let ground = this.matter.add.gameObject(this.add.sprite(width/2, height-40, 'ground'), {shape: groundShape.ground, ignoreGravity: true, isStatic: true}, true);
+        let ground = this.matter.add.gameObject(this.add.sprite(width/2, height-40, 'ground'), {name: 'ground', shape: groundShape.ground, ignoreGravity: true, isStatic: true}, true).setName('ground');
         
-        this.CreateUI();
-        this.CreateGameObjectBounds(width, height);
+        // this.CreateUI();
+        // this.CreateGameObjectBounds(width, height);
 
         //Create objectSpawner
         const bounds = this.matter.world.setBounds(-100,0,width+200, height+100);
         let spawner = new ObjectSpawner(this, width -20, 200, 'sprites', 'stack-1');
         this.add.existing(spawner);
         this.input.on('pointerdown', spawner.AddSpawnableObject, spawner);
-        this.scoreText.text = '0';
+        this.scoreText.text = this.score.toString();
+
         //this.physics.add.collider(spawner.spawnedShapes, bounds.walls, this.CreateUI, this);
 
-        this.matter.world.on('collisionstart', (event, colliderA : Phaser.GameObjects.GameObject, colliderB : Phaser.GameObjects.GameObject)=>{
-            console.log('collision');
-            console.log(colliderA.name);
-            console.log(colliderB.name);
-            if(colliderA.name == 'stack' && colliderB.name == 'worldBounds'){
-                colliderA.destroy(true);
-            }
-            if(colliderA.name == 'worldBounds' && colliderB.name == 'stack'){
-                colliderB.destroy(true);
-            }
-        });
+        // this.matter.world.on('collisionstart', (colliderA : Phaser.GameObjects.GameObject, colliderB : Phaser.GameObjects.GameObject)=>{
+        //     console.log('collision');
+        //     console.log(colliderA.name);
+        //     console.log(colliderB.name);
+        //     if(colliderB.name == 'worldBounds'){
+        //         //colliderA.destroy(true);
+        //         console.log(colliderA);
+        //     }
+        //     if(colliderA.name == 'worldBounds'){
+        //         //colliderB.destroy(true);
+        //         console.log(colliderA);
+        //     }
+        // });
+
+        // this.matter.world.on('collisionstart', (e, o1, o2)=>{
+        //     console.log(o1.label);
+        //     if([o1.label, o2.label].indexOf('worldBounds') != -1 &&
+        //     [o1.label, o2.label].indexOf('stack') != -1){
+        //         o2.gameObject.destroy();
+        //     }
+        // })
     }
 
     update(time: number, delta: number): void {
@@ -79,24 +91,33 @@ export default class GameScene extends Phaser.Scene{
         
         //Up
         let upperbounds = this.matter.add.gameObject(this.add.rectangle(w/2, 10, w, 10, 0x000000),{
+            label: 'worldBounds',
             name: 'worldBounds', 
-            ignoreGravity: true, 
+            ignoreGravity: true,
+            isSensor:true, 
             isStatic:true}, true).setName('worldBounds');
         //Bot
         let lowerbounds = this.matter.add.gameObject(this.add.rectangle(w/2, h-20, w, 10, 0x000000),{
+            label: 'worldBounds',
             name: 'worldBounds', 
-            ignoreGravity: true, 
+            ignoreGravity: true,
+            isSensor:true, 
             isStatic:true}, true).setName('worldBounds');
         //Left
         let leftbounds = this.matter.add.gameObject(this.add.rectangle(10, h/2, 10, h, 0x000000),{
+            label: 'worldBounds',
             name: 'worldBounds', 
-            ignoreGravity: true, 
+            ignoreGravity: true,
+            isSensor:true,  
             isStatic:true}, true).setName('worldBounds');
         //Right
         let rightbounds = this.matter.add.gameObject(this.add.rectangle(w-10, h/2, 10, h, 0x000000),{
+            label: 'worldBounds',
             name: 'worldBounds', 
-            ignoreGravity: true, 
+            ignoreGravity: true,
+            isSensor:true, 
             isStatic:true}, true).setName('worldBounds');
+            
         //this.worldbounds = this.physics.add.staticGroup([upperbounds, ]);
     }
 }
