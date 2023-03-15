@@ -6,9 +6,12 @@ import ScoreRect from '../classes/ScoreRect';
 export default class GameScene extends Phaser.Scene{
     
     score : number = 0;
+    highscore: number;
     scoreText: Phaser.GameObjects.Text;
+    highscoreText: Phaser.GameObjects.Text;
     ObjectSpawner : ObjectSpawner;
 
+    GroundHeight : number;
     Height : number;
     Width : number;
     constructor(){
@@ -38,44 +41,42 @@ export default class GameScene extends Phaser.Scene{
         const { width, height} = this.cameras.main;
         this.Width = width;
         this.Height = height;
-        let ground = this.matter.add.gameObject(this.add.sprite(width/2, height-40, 'ground'), {name: 'ground', shape: groundShape.ground, ignoreGravity: true, isStatic: true}, true).setName('ground');
-        
+        this.GroundHeight = height-40;
+        let ground = this.matter.add.gameObject(this.add.sprite(width/2, this.GroundHeight, 'ground'), {name: 'ground', shape: groundShape.ground, ignoreGravity: true, isStatic: true}, true).setName('ground');
         this.CreateUI();
-
         this.ObjectSpawner = new ObjectSpawner(this, width -20, 200, 'sprites', 'stack-1');
         this.add.existing(this.ObjectSpawner);
         this.input.on('pointerdown', this.ObjectSpawner.AddSpawnableObject, this.ObjectSpawner);
         this.scoreText.text = this.score.toString();
-
-        let scoreRect = new ScoreRect(this, width/2, height/2 + 75, width*0.8, height*0.6);
-        this.matter.add.gameObject(scoreRect, {
-            name:'scoreRect',
-            label:'scoreRect',
-            isStatic: true,
-            isSensor: true});
+        this.CalculateScore();
 
         this.matter.world.on('collisionstart', (e, o1, o2)=>{
-            if([o1.label, o2.label].indexOf('scoreRect') !=-1){
-                this.scoreText.text = this.score.toString();
-            }
-        })
-
-        this.matter.world.on('collisionend', (e, o1, o2)=>{
-            if([o1.label, o2.label].indexOf('scoreRect') !=-1){
-                this.scoreText.text = this.score.toString();
-            }
+            this.CalculateScore();
+            this.scoreText.text = this.score.toString();
+            this.ObjectSpawner.AllowSpawn();
         })
     }
 
     update(time: number, delta: number): void {
-        this.CalculateScore();
         this.CullObjects();
     }
 
     CreateUI(){
+        this.add.image(this.Width-60, 60, 'scoreUI').setScale(.7);
         this.add.image(60, 100, 'scoreUI').setScale(.7);
+        this.add.image(60, 60, 'scoreUI').setScale(.7);
+        this.add.image(32,60, 'scoreicon').setScale(.9);
         this.add.image(32,100, 'scoreicon').setTint(0x000000).setScale(.9);
-        this.scoreText = this.add.text(50, 93, '100')
+        this.scoreText = this.add.text(50, 93, '100',{
+            fontStyle: 'bold'
+        })
+        .setColor('0x000000')
+        .setStyle({
+            fontSize: '12pt',
+        });
+        this.highscoreText = this.add.text(50, 53, '100',{
+            fontStyle: 'bold'
+        })
         .setColor('0x000000')
         .setStyle({
             fontSize: '12pt'
@@ -86,14 +87,20 @@ export default class GameScene extends Phaser.Scene{
         if(this.ObjectSpawner.spawnedShapes.length <= 0){return;}
         let maxHeight : number = 0;
         for (let i = 0; i < this.ObjectSpawner.spawnedShapes.length; i++) {
-            let shape = this.ObjectSpawner.spawnedShapes[i];
-            if(this.ObjectSpawner.spawnedShapes[i].body.position.y < maxHeight){
-                maxHeight = this.ObjectSpawner.spawnedShapes[i].body.position.y;
+            if((this.GroundHeight - this.ObjectSpawner.spawnedShapes[i].body.position.y) > maxHeight){
+                maxHeight = (this.GroundHeight - this.ObjectSpawner.spawnedShapes[i].body.position.y);
             }
         }
+        console.log(this.GroundHeight);
+        console.log(this.ObjectSpawner.spawnedShapes[this.ObjectSpawner.spawnedShapes.length-1].body.position.y);
+        if(Phaser.Math.RoundTo(maxHeight,0) > this.score){
+            this.score = Phaser.Math.RoundTo(maxHeight, 0);
+        }
         
-        this.score = maxHeight * 100;
-        //this.scoreText.text = this.score.toString();
+        if(this.score > this.highscore){
+            this.highscore = this.score;
+            this.highscoreText.text = this.score.toString();
+        }
     }
     
     CullObjects(){
@@ -101,10 +108,11 @@ export default class GameScene extends Phaser.Scene{
             if(this.ObjectSpawner.spawnedShapes[i].body.position.y > this.Height){
                 this.ObjectSpawner.spawnedShapes[i].destroy();
                 this.ObjectSpawner.spawnedShapes.splice(i, 1);
-                console.log('begone');
-                console.log(this.ObjectSpawner.spawnedShapes.length);
             }
-            
         }
+    }
+
+    Restart(){
+        this.scene.restart();
     }
 }

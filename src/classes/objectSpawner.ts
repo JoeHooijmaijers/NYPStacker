@@ -7,6 +7,7 @@ export default class ObjectSpawner extends Phaser.GameObjects.Sprite{
     shapes;
     currentShape;
     spawnedShapes : Phaser.GameObjects.GameObject[];
+    canSpawn:boolean;
     
     constructor(scene: Phaser.Scene ,x: number, y:number, texture: string, frame: string){
         super(scene, x, y, texture, frame);
@@ -14,6 +15,7 @@ export default class ObjectSpawner extends Phaser.GameObjects.Sprite{
         this.shapes = this.scene.cache.json.get('shapes');
         this.spawnedShapes  = [];
         this.GetNextShape();
+        this.canSpawn = true;
     }
 
     DoTween(){
@@ -28,11 +30,14 @@ export default class ObjectSpawner extends Phaser.GameObjects.Sprite{
     }
 
     AddSpawnableObject(){
+        if(this.canSpawn){
+            var sprite = this.scene.add.sprite(this.x,this.y, this.texture, this.frame.name);
+            var obj : Phaser.GameObjects.GameObject = this.scene.matter.add.gameObject(sprite,{name: 'stack', label: 'stack', shape: this.currentShape},true).setName('stack');
+            this.spawnedShapes.push(obj);
+            this.canSpawn = false;
+            this.GetNextShape();
+        }
         
-        var sprite = this.scene.add.sprite(this.x,this.y, this.texture, this.frame.name);
-        var obj : Phaser.GameObjects.GameObject = this.scene.matter.add.gameObject(sprite,{name: 'stack', label: 'stack', shape: this.currentShape},true).setName('stack');
-        this.spawnedShapes.push(obj);
-        this.GetNextShape();
     }
 
     GetNextShape(){
@@ -62,5 +67,9 @@ export default class ObjectSpawner extends Phaser.GameObjects.Sprite{
             default:
                 break;
         }
+    }
+
+    AllowSpawn(){
+        this.canSpawn = true;
     }
 }
