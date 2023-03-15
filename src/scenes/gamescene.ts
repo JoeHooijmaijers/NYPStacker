@@ -38,7 +38,7 @@ export default class GameScene extends Phaser.Scene{
         const { width, height} = this.cameras.main;
         let ground = this.matter.add.gameObject(this.add.sprite(width/2, height-40, 'ground'), {name: 'ground', shape: groundShape.ground, ignoreGravity: true, isStatic: true}, true).setName('ground');
         
-        // this.CreateUI();
+        this.CreateUI();
         // this.CreateGameObjectBounds(width, height);
 
         //Create objectSpawner
