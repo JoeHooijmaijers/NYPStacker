@@ -13,7 +13,7 @@ export default{
     physics: {
         default: 'matter',
         matter:{
-            debug : true,
+            debug : false,
             gravity: {
                 x:0,
                 y:1,
