@@ -1,4 +1,3 @@
-import { debug } from 'console';
 import Phaser from 'phaser';
 import DroppableObject from '../classes/droppableObject';
 import ObjectSpawner from '../classes/objectSpawner';
@@ -6,11 +5,12 @@ import ScoreRect from '../classes/ScoreRect';
 
 export default class GameScene extends Phaser.Scene{
     
-    objectgroup;
     score : number = 0;
     scoreText: Phaser.GameObjects.Text;
-    worldbounds : Phaser.Physics.Arcade.StaticGroup;
+    ObjectSpawner : ObjectSpawner;
 
+    Height : number;
+    Width : number;
     constructor(){
         super('GameScene'); 
     }
@@ -36,16 +36,15 @@ export default class GameScene extends Phaser.Scene{
         var groundShape = this.cache.json.get('groundshape');
         this.add.image(187, 406, 'background');
         const { width, height} = this.cameras.main;
+        this.Width = width;
+        this.Height = height;
         let ground = this.matter.add.gameObject(this.add.sprite(width/2, height-40, 'ground'), {name: 'ground', shape: groundShape.ground, ignoreGravity: true, isStatic: true}, true).setName('ground');
         
         this.CreateUI();
-        // this.CreateGameObjectBounds(width, height);
 
-        //Create objectSpawner
-        //const bounds = this.matter.world.setBounds(-100,0,width+200, height+100);
-        let spawner = new ObjectSpawner(this, width -20, 200, 'sprites', 'stack-1');
-        this.add.existing(spawner);
-        this.input.on('pointerdown', spawner.AddSpawnableObject, spawner);
+        this.ObjectSpawner = new ObjectSpawner(this, width -20, 200, 'sprites', 'stack-1');
+        this.add.existing(this.ObjectSpawner);
+        this.input.on('pointerdown', this.ObjectSpawner.AddSpawnableObject, this.ObjectSpawner);
         this.scoreText.text = this.score.toString();
 
         let scoreRect = new ScoreRect(this, width/2, height/2 + 75, width*0.8, height*0.6);
@@ -57,45 +56,20 @@ export default class GameScene extends Phaser.Scene{
 
         this.matter.world.on('collisionstart', (e, o1, o2)=>{
             if([o1.label, o2.label].indexOf('scoreRect') !=-1){
-                this.score += scoreRect.scoreIncrement;
                 this.scoreText.text = this.score.toString();
             }
         })
 
         this.matter.world.on('collisionend', (e, o1, o2)=>{
             if([o1.label, o2.label].indexOf('scoreRect') !=-1){
-                this.score -= scoreRect.scoreIncrement;
                 this.scoreText.text = this.score.toString();
             }
         })
-
-        //this.physics.add.collider(spawner.spawnedShapes, bounds.walls, this.CreateUI, this);
-
-        // this.matter.world.on('collisionstart', (colliderA : Phaser.GameObjects.GameObject, colliderB : Phaser.GameObjects.GameObject)=>{
-        //     console.log('collision');
-        //     console.log(colliderA.name);
-        //     console.log(colliderB.name);
-        //     if(colliderB.name == 'worldBounds'){
-        //         //colliderA.destroy(true);
-        //         console.log(colliderA);
-        //     }
-        //     if(colliderA.name == 'worldBounds'){
-        //         //colliderB.destroy(true);
-        //         console.log(colliderA);
-        //     }
-        // });
-
-        // this.matter.world.on('collisionstart', (e, o1, o2)=>{
-        //     console.log(o1.label);
-        //     if([o1.label, o2.label].indexOf('worldBounds') != -1 &&
-        //     [o1.label, o2.label].indexOf('stack') != -1){
-        //         o2.gameObject.destroy();
-        //     }
-        // })
     }
 
     update(time: number, delta: number): void {
-        
+        this.CalculateScore();
+        this.CullObjects();
     }
 
     CreateUI(){
@@ -108,37 +82,29 @@ export default class GameScene extends Phaser.Scene{
         });
     }
 
-    CreateGameObjectBounds(w:number, h:number){
+    CalculateScore(){
+        if(this.ObjectSpawner.spawnedShapes.length <= 0){return;}
+        let maxHeight : number = 0;
+        for (let i = 0; i < this.ObjectSpawner.spawnedShapes.length; i++) {
+            let shape = this.ObjectSpawner.spawnedShapes[i];
+            if(this.ObjectSpawner.spawnedShapes[i].body.position.y < maxHeight){
+                maxHeight = this.ObjectSpawner.spawnedShapes[i].body.position.y;
+            }
+        }
         
-        //Up
-        let upperbounds = this.matter.add.gameObject(this.add.rectangle(w/2, 10, w, 10, 0x000000),{
-            label: 'worldBounds',
-            name: 'worldBounds', 
-            ignoreGravity: true,
-            isSensor:true, 
-            isStatic:true}, true).setName('worldBounds');
-        //Bot
-        let lowerbounds = this.matter.add.gameObject(this.add.rectangle(w/2, h-20, w, 10, 0x000000),{
-            label: 'worldBounds',
-            name: 'worldBounds', 
-            ignoreGravity: true,
-            isSensor:true, 
-            isStatic:true}, true).setName('worldBounds');
-        //Left
-        let leftbounds = this.matter.add.gameObject(this.add.rectangle(10, h/2, 10, h, 0x000000),{
-            label: 'worldBounds',
-            name: 'worldBounds', 
-            ignoreGravity: true,
-            isSensor:true,  
-            isStatic:true}, true).setName('worldBounds');
-        //Right
-        let rightbounds = this.matter.add.gameObject(this.add.rectangle(w-10, h/2, 10, h, 0x000000),{
-            label: 'worldBounds',
-            name: 'worldBounds', 
-            ignoreGravity: true,
-            isSensor:true, 
-            isStatic:true}, true).setName('worldBounds');
+        this.score = maxHeight * 100;
+        //this.scoreText.text = this.score.toString();
+    }
+    
+    CullObjects(){
+        for (let i = this.ObjectSpawner.spawnedShapes.length-1; i > 0; i--) {
+            if(this.ObjectSpawner.spawnedShapes[i].body.position.y > this.Height){
+                this.ObjectSpawner.spawnedShapes[i].destroy();
+                this.ObjectSpawner.spawnedShapes.splice(i, 1);
+                console.log('begone');
+                console.log(this.ObjectSpawner.spawnedShapes.length);
+            }
             
-        //this.worldbounds = this.physics.add.staticGroup([upperbounds, ]);
+        }
     }
 }

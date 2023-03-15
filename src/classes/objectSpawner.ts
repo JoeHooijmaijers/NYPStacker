@@ -6,13 +6,13 @@ export default class ObjectSpawner extends Phaser.GameObjects.Sprite{
     spawnrange : [-50, 50];
     shapes;
     currentShape;
-    spawnedShapes;
+    spawnedShapes : Phaser.GameObjects.GameObject[];
     
     constructor(scene: Phaser.Scene ,x: number, y:number, texture: string, frame: string){
         super(scene, x, y, texture, frame);
         this.DoTween();
         this.shapes = this.scene.cache.json.get('shapes');
-        this.spawnedShapes = [];
+        this.spawnedShapes  = [];
         this.GetNextShape();
     }
 
