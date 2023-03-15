@@ -1,5 +1,4 @@
 import Phaser, { Scene } from "phaser";
-import DroppableObject from "./droppableObject";
 
 export default class ObjectSpawner extends Phaser.GameObjects.Sprite{
 
@@ -35,6 +34,7 @@ export default class ObjectSpawner extends Phaser.GameObjects.Sprite{
             var obj : Phaser.GameObjects.GameObject = this.scene.matter.add.gameObject(sprite,{name: 'stack', label: 'stack', shape: this.currentShape},true).setName('stack');
             this.spawnedShapes.push(obj);
             this.canSpawn = false;
+            this.visible = false;
             this.GetNextShape();
         }
         
@@ -70,6 +70,7 @@ export default class ObjectSpawner extends Phaser.GameObjects.Sprite{
     }
 
     AllowSpawn(){
+        this.visible = true;
         this.canSpawn = true;
     }
 }
